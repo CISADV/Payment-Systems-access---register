@@ -1,0 +1,22 @@
+{
+  "last_update": "2026-08-25 17:16 UTC",
+  "total_count": 2,
+  "institutions": [
+    {
+      "ID_Registre": "10002",
+      "Nom_Etablissement": "Crédit Agricole SA",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "AGRIFR2PPXX",
+      "Pays_Autorite": "FR",
+      "Acces_Direct_SEPA": "Oui (TARGET2)"
+    },
+    {
+      "ID_Registre": "30001",
+      "Nom_Etablissement": "Revolut Bank UAB",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "REVO22XX",
+      "Pays_Autorite": "LT",
+      "Acces_Direct_SEPA": "Oui (CENTROlink)"
+    }
+  ]
+}
