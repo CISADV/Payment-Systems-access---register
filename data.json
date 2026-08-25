@@ -1,7 +1,31 @@
 {
-  "last_update": "2026-08-25 17:43 UTC",
-  "total_count": 4,
+  "last_update": "2026-08-25 19:18 UTC",
+  "total_count": 9,
   "institutions": [
+    {
+      "ID_Registre": "FR-10002",
+      "Nom_Etablissement": "Crédit Agricole SA",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "AGRIFR2PPXX",
+      "Pays_Autorite": "FR",
+      "Acces_Direct_SEPA": "Oui (TARGET2)"
+    },
+    {
+      "ID_Registre": "FR-10003",
+      "Nom_Etablissement": "BNP Paribas",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "BNPAFR2PPXX",
+      "Pays_Autorite": "FR",
+      "Acces_Direct_SEPA": "Oui (TARGET2)"
+    },
+    {
+      "ID_Registre": "FR-10004",
+      "Nom_Etablissement": "Qonto (Olinda SAS)",
+      "Type_Agrement": "Établissement de paiement",
+      "Code_BIC": "OLINFR21XX",
+      "Pays_Autorite": "FR",
+      "Acces_Direct_SEPA": "Oui (TARGET2)"
+    },
     {
       "ID_Registre": "LT-30001",
       "Nom_Etablissement": "Revolut Bank UAB",
@@ -33,6 +57,22 @@
       "Code_BIC": "MOBI22XX",
       "Pays_Autorite": "LV",
       "Acces_Direct_SEPA": "Oui (EKS Latvijas Banka)"
+    },
+    {
+      "ID_Registre": "DE-50001",
+      "Nom_Etablissement": "N26 Bank AG",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "N262DEFFXXX",
+      "Pays_Autorite": "DE",
+      "Acces_Direct_SEPA": "Oui (Bundesbank SEPA-Clearer)"
+    },
+    {
+      "ID_Registre": "DE-50002",
+      "Nom_Etablissement": "Solaris SE",
+      "Type_Agrement": "Établissement de crédit / BaaS",
+      "Code_BIC": "SOLADE11XXX",
+      "Pays_Autorite": "DE",
+      "Acces_Direct_SEPA": "Oui (Bundesbank SEPA-Clearer)"
     }
   ]
 }
