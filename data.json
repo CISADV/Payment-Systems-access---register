@@ -1,22 +1,38 @@
 {
-  "last_update": "2026-08-25 17:39 UTC",
-  "total_count": 2,
+  "last_update": "2026-08-25 17:43 UTC",
+  "total_count": 4,
   "institutions": [
     {
-      "ID_Registre": "10002",
-      "Nom_Etablissement": "Crédit Agricole SA",
-      "Type_Agrement": "Établissement de crédit",
-      "Code_BIC": "AGRIFR2PPXX",
-      "Pays_Autorite": "FR",
-      "Acces_Direct_SEPA": "Oui (TARGET2)"
-    },
-    {
-      "ID_Registre": "30001",
+      "ID_Registre": "LT-30001",
       "Nom_Etablissement": "Revolut Bank UAB",
       "Type_Agrement": "Établissement de crédit",
       "Code_BIC": "REVO22XX",
       "Pays_Autorite": "LT",
-      "Acces_Direct_SEPA": "Oui (CENTROlink)"
+      "Acces_Direct_SEPA": "Oui (CENTROlink BOL)"
+    },
+    {
+      "ID_Registre": "LT-30002",
+      "Nom_Etablissement": "Paysera LT UAB",
+      "Type_Agrement": "Electronic Money Institution",
+      "Code_BIC": "PAYSLT21XX",
+      "Pays_Autorite": "LT",
+      "Acces_Direct_SEPA": "Oui (CENTROlink BOL)"
+    },
+    {
+      "ID_Registre": "LV-40001",
+      "Nom_Etablissement": "AS Citadele banka",
+      "Type_Agrement": "Établissement de crédit",
+      "Code_BIC": "PARX22XX",
+      "Pays_Autorite": "LV",
+      "Acces_Direct_SEPA": "Oui (EKS Latvijas Banka)"
+    },
+    {
+      "ID_Registre": "LV-40002",
+      "Nom_Etablissement": "Mobilly SIA",
+      "Type_Agrement": "Payment Institution",
+      "Code_BIC": "MOBI22XX",
+      "Pays_Autorite": "LV",
+      "Acces_Direct_SEPA": "Oui (EKS Latvijas Banka)"
     }
   ]
 }
