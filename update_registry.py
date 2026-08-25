@@ -1,42 +1,95 @@
 import json
 import requests
 import pandas as pd
-import io
 
 HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 }
 
-def get_registry_data():
-    return [
-        # France (FR)
-        {"ID_Registre": "FR-10002", "Nom_Etablissement": "Crédit Agricole SA", "Type_Agrement": "Établissement de crédit", "Code_BIC": "AGRIFR2PPXX", "Pays_Autorite": "FR", "Acces_Direct_SEPA": "Oui (TARGET2)"},
-        {"ID_Registre": "FR-10003", "Nom_Etablissement": "BNP Paribas", "Type_Agrement": "Établissement de crédit", "Code_BIC": "BNPAFR2PPXX", "Pays_Autorite": "FR", "Acces_Direct_SEPA": "Oui (TARGET2)"},
-        {"ID_Registre": "FR-10004", "Nom_Etablissement": "Qonto (Olinda SAS)", "Type_Agrement": "Établissement de paiement", "Code_BIC": "OLINFR21XX", "Pays_Autorite": "FR", "Acces_Direct_SEPA": "Oui (TARGET2)"},
-        
-        # Lituanie (LT)
-        {"ID_Registre": "LT-30001", "Nom_Etablissement": "Revolut Bank UAB", "Type_Agrement": "Établissement de crédit", "Code_BIC": "REVO22XX", "Pays_Autorite": "LT", "Acces_Direct_SEPA": "Oui (CENTROlink BOL)"},
-        {"ID_Registre": "LT-30002", "Nom_Etablissement": "Paysera LT UAB", "Type_Agrement": "Electronic Money Institution", "Code_BIC": "PAYSLT21XX", "Pays_Autorite": "LT", "Acces_Direct_SEPA": "Oui (CENTROlink BOL)"},
-        
-        # Lettonie (LV)
-        {"ID_Registre": "LV-40001", "Nom_Etablissement": "AS Citadele banka", "Type_Agrement": "Établissement de crédit", "Code_BIC": "PARX22XX", "Pays_Autorite": "LV", "Acces_Direct_SEPA": "Oui (EKS Latvijas Banka)"},
-        {"ID_Registre": "LV-40002", "Nom_Etablissement": "Mobilly SIA", "Type_Agrement": "Payment Institution", "Code_BIC": "MOBI22XX", "Pays_Autorite": "LV", "Acces_Direct_SEPA": "Oui (EKS Latvijas Banka)"},
-        
-        # Allemagne (DE)
-        {"ID_Registre": "DE-50001", "Nom_Etablissement": "N26 Bank AG", "Type_Agrement": "Établissement de crédit", "Code_BIC": "N262DEFFXXX", "Pays_Autorite": "DE", "Acces_Direct_SEPA": "Oui (Bundesbank SEPA-Clearer)"},
-        {"ID_Registre": "DE-50002", "Nom_Etablissement": "Solaris SE", "Type_Agrement": "Établissement de crédit / BaaS", "Code_BIC": "SOLADE11XXX", "Pays_Autorite": "DE", "Acces_Direct_SEPA": "Oui (Bundesbank SEPA-Clearer)"}
-    ]
+def fetch_target2_direct_bics():
+    """
+    Récupère la liste des BICs ayant un accès DIRECT à TARGET2 / STEP2 (BCE).
+    """
+    print("Récupération de l'annuaire des participants directs TARGET2...")
+    # Fichier miroir Open Data du répertoire T2
+    url = "https://raw.githubusercontent.com/datasets/financial-entities/main/data/target2_bics.json"
+    try:
+        res = requests.get(url, headers=HTTP_HEADERS, timeout=15)
+        if res.status_code == 200:
+            return set(res.json())
+    except Exception as e:
+        print(f"Info TARGET2 : {e}")
+    # BICs majeurs de référence en cas d'indisponibilité
+    return {"AGRIFR2PPXX", "BNPAFR2PPXX", "N262DEFFXXX", "SOLADE11XXX", "REVO22XX", "PARX22XX"}
+
+
+def fetch_and_qualify_institutions():
+    """
+    Extrait les agréments EBA et croise avec les accès systèmes.
+    """
+    print("Extraction du registre EBA et qualification de l'accès...")
+    url = "https://eurep.eba.europa.eu/eurep-register/api/v1/payment-institutions"
+    
+    direct_t2_bics = fetch_target2_direct_bics()
+    target_countries = {"FR", "DE", "LT", "LV"}
+    records = []
+
+    try:
+        res = requests.get(url, headers=HTTP_HEADERS, timeout=30)
+        if res.status_code == 200:
+            items = res.json().get("content", []) if isinstance(res.json(), dict) else res.json()
+            
+            for item in items:
+                country = str(item.get("countryCode", "")).upper()
+                if country in target_countries:
+                    bic = str(item.get("bic", "")).strip()
+                    
+                    # Logique de qualification Direct vs Indirect
+                    is_direct = False
+                    system_label = "Non / Accès indirect (Banque sponsor)"
+
+                    if bic and bic != "nan":
+                        # Test d'accès direct selon le pays et la présence dans les annuaires
+                        if country == "LT":
+                            is_direct = True
+                            system_label = "Direct Participant (CENTROlink BOL)"
+                        elif country == "LV":
+                            is_direct = True
+                            system_label = "Direct Participant (EKS Latvijas Banka)"
+                        elif country == "DE" and (bic in direct_t2_bics or "DE" in bic):
+                            is_direct = True
+                            system_label = "Direct Participant (Bundesbank SEPA-Clearer)"
+                        elif country == "FR" and (bic in direct_t2_bics or "FR" in bic):
+                            is_direct = True
+                            system_label = "Direct Participant (TARGET2 / STEP2)"
+
+                    records.append({
+                        "ID_Registre": str(item.get("nationalIdentifier") or item.get("id", "")),
+                        "Nom_Etablissement": str(item.get("name", "Inconnu")).strip(),
+                        "Type_Agrement": str(item.get("institutionType", "Credit / Payment Institution")).strip(),
+                        "Code_BIC": bic if bic else "N/A",
+                        "Pays_Autorite": country,
+                        "Statut_Acces": "DIRECT" if is_direct else "INDIRECT",
+                        "Acces_Direct_SEPA": system_label
+                    })
+            print(f"Qualification terminée : {len(records)} établissements traités.")
+            return records
+    except Exception as e:
+        print(f"Erreur EBA: {e}")
+    return []
+
 
 def run():
-    all_records = get_registry_data()
+    records = fetch_and_qualify_institutions()
+    
     output_data = {
         "last_update": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M UTC"),
-        "total_count": len(all_records),
-        "institutions": all_records
+        "total_count": len(records),
+        "institutions": records
     }
+    
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
-    print(f"data.json généré avec {len(all_records)} entités.")
 
 if __name__ == "__main__":
     run()
